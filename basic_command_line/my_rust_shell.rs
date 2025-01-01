@@ -24,9 +24,7 @@ fn evaluate(cmd_line: &str) {
 
     let argv: Vec<&str> = cmd_line.split_whitespace().collect();
     if !builtin_cmd(&argv) {
-        let result = Command::new(argv[0])
-            .args(&argv[1..])
-            .spawn();
+        let result = Command::new(argv[0]).args(&argv[1..]).spawn();
         match result {
             Ok(mut child) => { 
                 child.wait().expect("Failed while waiting on child process"); 
