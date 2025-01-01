@@ -1,2 +1,6 @@
-# random_rust_projects
-A collection of the various Rust projects I work on to learn the language better
+# Learning Rust
+
+## Commands to know
+
+- `cargo run` - Run the Rust program
+- `rustc <path/to/rust/script>` - Compile a single Rust script
