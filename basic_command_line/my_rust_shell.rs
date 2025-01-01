@@ -24,11 +24,17 @@ fn evaluate(cmd_line: &str) {
 
     let argv: Vec<&str> = cmd_line.split_whitespace().collect();
     if !builtin_cmd(&argv) {
-        let mut child = Command::new(argv[0])
+        let result = Command::new(argv[0])
             .args(&argv[1..])
-            .spawn()  // 'output' is blocking as parent waits on child while 'spawn' is not
-            .expect("Failed to start child process");  // TODO: breaks program here if program is not found
-        let _exit_code = child.wait().expect("Failed while running child process");
+            .spawn();
+        match result {
+            Ok(mut child) => { 
+                child.wait().expect("Failed while waiting on child process"); 
+            }
+            Err(error) => {
+                eprintln!("Error: {}", error.to_string());
+            }
+        }
     }
 }
 
