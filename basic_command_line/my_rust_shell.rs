@@ -1,4 +1,5 @@
 use std::io::{self, Write};
+use std::process::{self, Command};
 
 const EXIT_SUCCESS: i32 = 0;
 // const EXIT_FAILURE: i32 = 1;
@@ -8,7 +9,7 @@ const PROMPT: &str = "my_rust_shell> ";
 fn builtin_cmd(argv: &Vec<&str>) -> bool {
     match argv[0] {
         "quit" => {
-            std::process::exit(EXIT_SUCCESS);
+            process::exit(EXIT_SUCCESS);
         }
         _ => {
             return false;
@@ -23,8 +24,11 @@ fn evaluate(cmd_line: &str) {
 
     let argv: Vec<&str> = cmd_line.split_whitespace().collect();
     if !builtin_cmd(&argv) {
-        // TODO: handle the command by forking a child process that handles it
-        println!("NOT a built-in command");
+        let mut child = Command::new(argv[0])
+            .args(&argv[1..])
+            .spawn()  // 'output' is blocking as parent waits on child while 'spawn' is not
+            .expect("Failed to start child process");  // TODO: breaks program here if program is not found
+        let _exit_code = child.wait().expect("Failed while running child process");
     }
 }
 
@@ -34,11 +38,11 @@ fn main() {
     loop {
         if emit_prompt {
             print!("{}", PROMPT);
-            io::stdout().flush().unwrap();  // unwrapping means the program will panic if the flush failed
+            io::stdout().flush().expect("Failed to flush STDOUT");
         }
         
         let mut input = String::new();
-        io::stdin().read_line(&mut input).unwrap();
+        io::stdin().read_line(&mut input).expect("Failedto read from STDIN");
 
         // break if EOF (Ctrl-Z on Windows)
         if input.is_empty() {
@@ -48,5 +52,5 @@ fn main() {
         evaluate(input.trim());
     }
 
-    std::process::exit(EXIT_SUCCESS);
+    process::exit(EXIT_SUCCESS);
 }
